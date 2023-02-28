@@ -14,6 +14,14 @@ export default class API {
         cors_proxy: "https://cors.consumet.stream"
     }
 
+    public config = {
+        web_server: {
+            url: "http://localhost:3060",
+            port: 3060
+        },
+        cors_proxy: "https://cors.consumet.stream"
+    }
+
     constructor(options?) {
         this.loadConfig(options);
     }
@@ -35,6 +43,7 @@ export default class API {
                 ...options
             }
         }
+        API.config = this.config;
     }
 
     public async fetch(url:string, options?:Options): Promise<Response> {

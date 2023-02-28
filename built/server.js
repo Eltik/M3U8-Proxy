@@ -30,6 +30,11 @@ fastify.get("/", async (req, res) => {
     Welcome to M3U8-Proxy.\n
     ---------------------\n
     API Documentation:\n
+    GET /test - Test page.\n
+    GET /m3u8_proxy?url={url}&headers={headers} - Proxy for m3u8 files. {url} must be encoded and {headers} must be encoded stringified JSON.\n
+    ---------------------\n
+    An example of a request to /m3u8_proxy would be:\n
+    /m3u8_proxy?url=https%3A%2F%2Fexample.com%2Ffile.m3u8&headers=%7B%22referer%22%3A%22https%3A%2F%2Fexample.com%22%7D\n
     ---------------------\n
     `;
 });

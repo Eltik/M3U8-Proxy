@@ -6,9 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const node_stream_1 = require("node:stream");
 const node_util_1 = require("node:util");
+const API_1 = __importDefault(require("../API"));
 class PromiseRequest {
     constructor(url, options) {
-        this.corsProxy = process.env.CORS_PROXY + "/" || "https://cors.consume.stream/";
+        this.corsProxy = API_1.default.config.cors_proxy + "/";
         this.url = url;
         this.options = options;
     }

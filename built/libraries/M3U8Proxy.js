@@ -8,7 +8,7 @@ class M3U8Proxy extends API_1.default {
     constructor(url) {
         super();
         this.url = "";
-        this.corsProxy = process.env.CORS_PROXY || "https://cors.consumet.stream";
+        this.corsProxy = this.config.cors_proxy;
         this.url = url;
     }
     async proxy(headers, reply) {

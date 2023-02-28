@@ -4,11 +4,19 @@ import { ReadStream, WriteStream } from "fs";
 export default class API {
     sentRequests: SentRequest[];
     private userAgent;
+    static config: {
+        web_server: {
+            url: string;
+            port: number;
+        };
+        cors_proxy: string;
+    };
     config: {
         web_server: {
             url: string;
             port: number;
         };
+        cors_proxy: string;
     };
     constructor(options?: any);
     loadConfig(options?: any): void;

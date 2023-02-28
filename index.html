@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Example</title>
+        <style>
+            video {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <video id="hls" controls></video>
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        <script>
+            if (Hls.isSupported()) {
+                var video = document.getElementById('hls');
+                var hls = new Hls();
+                hls.loadSource(`http://localhost:3060/m3u8_proxy?url=${encodeURIComponent("https://geok.vizcloud.club/simple/EqPFJvkQWADtjDlGha7rC8cuqVxau_ftCE17rqk+wYMnU94US2El_Po4w12g/br/list.m3u8")}&headers=${encodeURIComponent(JSON.stringify({ "Referer": "https://9anime.pl" }))}`);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log(`http://localhost:3060/m3u8_proxy?url=${encodeURIComponent("https://geok.vizcloud.club/simple/EqPFJvkQWADtjDlGha7rC8cuqVxau_ftCE17rqk+wYMnU94US2El_Po4w12g/br/list.m3u8")}&headers=${encodeURIComponent(JSON.stringify({ "Referer": "https://9anime.pl" }))}`)
+                });
+            }
+        </script>
+    </body>
+</html>

@@ -12,7 +12,8 @@ class API {
             web_server: {
                 url: "http://localhost:3060",
                 port: 3060
-            }
+            },
+            cors_proxy: "https://cors.consumet.stream"
         };
         this.loadConfig(options);
     }
@@ -23,12 +24,16 @@ class API {
         if (process.env.WEB_SERVER_PORT) {
             this.config.web_server.port = Number(process.env.WEB_SERVER_PORT);
         }
+        if (process.env.CORS_PROXY) {
+            this.config.cors_proxy = process.env.CORS_PROXY;
+        }
         if (options) {
             this.config = {
                 ...this.config,
                 ...options
             };
         }
+        API.config = this.config;
     }
     async fetch(url, options) {
         const request = new promise_request_1.default(url, {
@@ -147,4 +152,11 @@ class API {
     }
 }
 exports.default = API;
+API.config = {
+    web_server: {
+        url: "http://localhost:3060",
+        port: 3060
+    },
+    cors_proxy: "https://cors.consumet.stream"
+};
 //# sourceMappingURL=API.js.map
