@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "outDir": "./built",
+        "allowJs": true,
+        "target": "ES2020",
+        "sourceMap": true,
+        "module": "CommonJS",
+        "resolveJsonModule": true,
+        "declaration": true,
+        "esModuleInterop": true
+    },
+    "include": ["./src/**/*"],
+    "exclude": [
+        "db.db"
+    ]
+}
