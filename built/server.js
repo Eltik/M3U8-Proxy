@@ -9,15 +9,10 @@ const M3U8Proxy_1 = __importDefault(require("./libraries/M3U8Proxy"));
 const path_1 = require("path");
 const fs_1 = require("fs");
 const API_1 = __importDefault(require("./API"));
+const colors_1 = __importDefault(require("colors"));
 dotenv_1.default.config();
 const api = new API_1.default();
-const server = http_1.default.createServer((req, res) => {
-    /*
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain");
-    res.end("Hello, world!");
-    */
-});
+const server = http_1.default.createServer();
 server.on("request", async (req, res) => {
     const uri = new URL(req.url, "http://localhost:3000");
     if (uri.pathname === "/m3u8_proxy") {
@@ -38,6 +33,6 @@ server.on("request", async (req, res) => {
     }
 });
 server.listen(api.config.web_server.port, () => {
-    console.log("Server running");
+    console.log(colors_1.default.green("Server running on ") + colors_1.default.blue(`http://localhost:${api.config.web_server.port}`));
 });
 //# sourceMappingURL=server.js.map

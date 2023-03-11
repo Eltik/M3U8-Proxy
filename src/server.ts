@@ -4,18 +4,13 @@ import M3U8Proxy from "./libraries/M3U8Proxy";
 import { join } from "path";
 import { readFileSync } from "fs";
 import API from "./API";
+import colors from "colors";
 
 dotenv.config();
 
 const api = new API();
 
-const server = http.createServer((req, res) => {
-    /*
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain");
-    res.end("Hello, world!");
-    */
-});
+const server = http.createServer();
 
 server.on("request", async (req, res) => {
     const uri = new URL(req.url, "http://localhost:3000");
@@ -36,5 +31,5 @@ server.on("request", async (req, res) => {
 });
 
 server.listen(api.config.web_server.port, () => {
-    console.log("Server running");
+    console.log(colors.green("Server running on ") + colors.blue(`http://localhost:${api.config.web_server.port}`));
 });
