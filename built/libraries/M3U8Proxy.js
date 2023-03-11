@@ -20,7 +20,14 @@ class M3U8Proxy extends API_1.default {
     async proxy(headers, res) {
         const req = await this.fetch(this.url, {
             headers: headers,
+        }).catch((err) => {
+            res.writeHead(500);
+            res.end(err.message);
+            return null;
         });
+        if (!req) {
+            return;
+        }
         const m3u8 = req.text();
         if (m3u8.includes("RESOLUTION=")) {
             // Deals with the master m3u8 and replaces all sub-m3u8 files (quality m3u8 files basically) to use the m3u8 proxy.
@@ -94,15 +101,22 @@ class M3U8Proxy extends API_1.default {
             }
         };
         // Proxy request and pipe to client
-        const proxy = http_1.default.request(options, (r) => {
-            res.writeHead(r.statusCode, r.headers);
-            r.pipe(res, {
+        try {
+            const proxy = http_1.default.request(options, (r) => {
+                res.writeHead(r.statusCode, r.headers);
+                r.pipe(res, {
+                    end: true
+                });
+            });
+            req.pipe(proxy, {
                 end: true
             });
-        });
-        req.pipe(proxy, {
-            end: true
-        });
+        }
+        catch (e) {
+            res.writeHead(500);
+            res.end(e.message);
+            return null;
+        }
     }
 }
 exports.default = M3U8Proxy;

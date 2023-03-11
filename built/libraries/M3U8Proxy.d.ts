@@ -17,5 +17,5 @@ export default class M3U8Proxy extends API {
      * @param req Client request object
      * @param res Server response object
      */
-    proxyTs(headers: any, req: any, res: http.ServerResponse): Promise<void>;
+    proxyTs(headers: any, req: any, res: http.ServerResponse): Promise<any>;
 }
