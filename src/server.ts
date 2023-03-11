@@ -28,7 +28,8 @@ fastifyPlugins.push(corsPlugin);
 fastify.get("/", async(req, res) => {
     res.type("application/json").code(200);
     return `
-    Welcome to M3U8-Proxy.\n
+    Welcome to Eltik's M3U8-Proxy.\n
+    Please note that spamming this API will result in an IP ban.\n
     ---------------------\n
     API Documentation:\n
     GET /test - Test page.\n
@@ -37,6 +38,7 @@ fastify.get("/", async(req, res) => {
     An example of a request to /m3u8_proxy would be:\n
     /m3u8_proxy?url=https%3A%2F%2Fexample.com%2Ffile.m3u8&headers=%7B%22referer%22%3A%22https%3A%2F%2Fexample.com%22%7D\n
     ---------------------\n
+    GitHub Repo: https://github.com/Eltik/M3U8-Proxy\n
     `;
 })
 

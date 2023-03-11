@@ -1,7 +1,22 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>Example</title>
+        <title>Eltik's M3U8 Proxy</title>
+        <meta charset="utf-8">
+        <meta name="title" content="Eltik's M3U8 Proxy" />
+        <meta name="description" content="Playground for testing Eltik's m3u8 proxy." />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://m3u8.eltik.net/test" />
+        <meta property="og:title" content="Eltik's M3U8 Proxy" />
+        <meta property="og:description" content="Playground for testing Eltik's m3u8 proxy." />
+        <meta property="og:image" content="" />
+
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://m3u8.eltik.net/test" />
+        <meta property="twitter:title" content="Eltik's M3U8 Proxy"/>
+        <meta property="twitter:description" content="Playground for testing Eltik's m3u8 proxy." />
+        <meta property="twitter:image" content="" />
         <style>
             video {
                 width: 100%;
@@ -10,17 +25,32 @@
         </style>
     </head>
     <body>
+        <label for="url">URL</label>
+        <input type="text" placeholder="https://geok.vizcloud.club/simple/EqPFJvkQWADtjDlGha7rC8cuqVxau_ftCE17rqk+wYMnU94US2El_Po4w12g/br/list.m3u8" id="url" />
+        <textarea id="headers" placeholder='{"Referer": "https://9anime.pl"}'></textarea>
         <video id="hls" controls></video>
         <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
         <script>
-            if (Hls.isSupported()) {
-                var video = document.getElementById('hls');
-                var hls = new Hls();
-                hls.loadSource(`http://localhost:3060/m3u8_proxy?url=${encodeURIComponent("https://geok.vizcloud.club/simple/EqPFJvkQWADtjDlGha7rC8cuqVxau_ftCE17rqk+wYMnU94US2El_Po4w12g/br/list.m3u8")}&headers=${encodeURIComponent(JSON.stringify({ "Referer": "https://9anime.pl" }))}`);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    console.log(`http://localhost:3060/m3u8_proxy?url=${encodeURIComponent("https://geok.vizcloud.club/simple/EqPFJvkQWADtjDlGha7rC8cuqVxau_ftCE17rqk+wYMnU94US2El_Po4w12g/br/list.m3u8")}&headers=${encodeURIComponent(JSON.stringify({ "Referer": "https://9anime.pl" }))}`)
-                });
+            function test() {
+                const url = document.getElementById('url').value;
+                let headers = document.getElementById('headers').value;
+
+                try {
+                    headers = JSON.parse(headers);
+                } catch (e) {
+                    headers = {};
+                    alert("Invalid headers. Set headers to {}.");
+                }
+
+                if (Hls.isSupported()) {
+                    var video = document.getElementById('hls');
+                    var hls = new Hls();
+                    hls.loadSource(`http://localhost:3060/m3u8_proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        console.log(`http://localhost:3060/m3u8_proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`)
+                    });
+                }
             }
         </script>
     </body>
