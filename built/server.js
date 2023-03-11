@@ -3,93 +3,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fastify_1 = __importDefault(require("fastify"));
-const cors_1 = __importDefault(require("@fastify/cors"));
-const colors_1 = __importDefault(require("colors"));
+const http_1 = __importDefault(require("http"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const M3U8Proxy_1 = __importDefault(require("./libraries/M3U8Proxy"));
 const path_1 = require("path");
 const fs_1 = require("fs");
 const API_1 = __importDefault(require("./API"));
-const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const api = new API_1.default();
-const fastify = (0, fastify_1.default)({
-    logger: false
+const server = http_1.default.createServer((req, res) => {
+    /*
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Hello, world!");
+    */
 });
-const fastifyPlugins = [];
-const corsPlugin = new Promise((resolve, reject) => {
-    fastify.register(cors_1.default, {
-        origin: ['*'],
-        methods: ['POST', 'GET', 'PATCH', 'DELETE', 'OPTIONS'],
-    }).then(() => {
-        resolve(true);
-    });
+server.on("request", async (req, res) => {
+    const uri = new URL(req.url, "http://localhost:3000");
+    if (uri.pathname === "/m3u8_proxy") {
+        const headers = JSON.parse(uri.searchParams.get("headers"));
+        const url = uri.searchParams.get("url");
+        const proxy = new M3U8Proxy_1.default(url);
+        await proxy.proxy(headers, res);
+    }
+    else if (uri.pathname === "/ts_proxy") {
+        const headers = JSON.parse(uri.searchParams.get("headers"));
+        const url = uri.searchParams.get("url");
+        const proxy = new M3U8Proxy_1.default(url);
+        await proxy.proxyTs(headers, req, res);
+    }
+    else if (uri.pathname === "/") {
+        res.setHeader("Content-Type", "text/html");
+        res.end((0, fs_1.readFileSync)((0, path_1.join)(__dirname, "../index.html")));
+    }
 });
-fastifyPlugins.push(corsPlugin);
-fastify.get("/", async (req, res) => {
-    res.type("application/json").code(200);
-    return `
-    Welcome to Eltik's M3U8-Proxy.\n
-    Please note that spamming this API will result in an IP ban.\n
-    ---------------------\n
-    API Documentation:\n
-    GET /test - Test page.\n
-    GET /m3u8_proxy?url={url}&headers={headers} - Proxy for m3u8 files. {url} must be encoded and {headers} must be encoded stringified JSON.\n
-    ---------------------\n
-    An example of a request to /m3u8_proxy would be:\n
-    /m3u8_proxy?url=https%3A%2F%2Fexample.com%2Ffile.m3u8&headers=%7B%22referer%22%3A%22https%3A%2F%2Fexample.com%22%7D\n
-    ---------------------\n
-    GitHub Repo: https://github.com/Eltik/M3U8-Proxy\n
-    `;
-});
-/**
- * @description Proxy for m3u8 files
- * @example /m3u8_proxy?url=https://example.com/file.m3u8&headers={"referer":"https://example.com"}
- */
-fastify.get("/m3u8_proxy*", async (req, res) => {
-    const url = req.query["url"];
-    let headers = decodeURIComponent(req.query["headers"]);
-    try {
-        headers = JSON.parse(headers);
-    }
-    catch {
-        res.type("application/json").code(400);
-        return { error: "Invalid headers." };
-    }
-    if (!url || url.length === 0) {
-        res.type("application/json").code(400);
-        return { error: "Invalid URL." };
-    }
-    const m3u8Proxy = new M3U8Proxy_1.default(url);
-    await m3u8Proxy.proxy(headers, res);
-});
-fastify.get("/ts_proxy*", async (req, res) => {
-    const url = req.query["url"];
-    let headers = decodeURIComponent(req.query["headers"]);
-    try {
-        headers = JSON.parse(headers);
-    }
-    catch {
-        res.type("application/json").code(400);
-        return { error: "Invalid headers." };
-    }
-    if (!url || url.length === 0) {
-        res.type("application/json").code(400);
-        return { error: "Invalid URL." };
-    }
-    const m3u8Proxy = new M3U8Proxy_1.default(url);
-    await m3u8Proxy.proxyTs(headers, res);
-});
-// temp
-fastify.get("/test", (req, res) => {
-    const file = (0, fs_1.readFileSync)((0, path_1.join)(__dirname, "../index.html"));
-    res.type("text/html").send(file);
-});
-Promise.all(fastifyPlugins).then(() => {
-    fastify.listen({ port: api.config.web_server.port }, (err, address) => {
-        if (err)
-            throw err;
-        console.log(colors_1.default.gray(`Running on `) + colors_1.default.blue(`${address}`));
-    });
+server.listen(api.config.web_server.port, () => {
+    console.log("Server running");
 });
 //# sourceMappingURL=server.js.map
