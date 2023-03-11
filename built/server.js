@@ -10,6 +10,8 @@ const M3U8Proxy_1 = __importDefault(require("./libraries/M3U8Proxy"));
 const path_1 = require("path");
 const fs_1 = require("fs");
 const API_1 = __importDefault(require("./API"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const api = new API_1.default();
 const fastify = (0, fastify_1.default)({
     logger: false

@@ -5,6 +5,8 @@ import M3U8Proxy from "./libraries/M3U8Proxy";
 import { join } from "path";
 import { readFileSync } from "fs";
 import API from "./API";
+import dotenv from "dotenv";
+dotenv.config();
 
 const api = new API();
 
