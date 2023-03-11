@@ -65,6 +65,23 @@ fastify.get("/m3u8_proxy*", async(req, res) => {
     await m3u8Proxy.proxy(headers, res);
 })
 
+fastify.get("/ts_proxy*", async(req, res) => {
+    const url = req.query["url"]
+    let headers = decodeURIComponent(req.query["headers"]);
+    try {
+        headers = JSON.parse(headers);
+    } catch {
+        res.type("application/json").code(400);
+        return { error: "Invalid headers." };
+    }
+    if (!url || url.length === 0) {
+        res.type("application/json").code(400);
+        return { error: "Invalid URL." };
+    }
+    const m3u8Proxy = new M3U8Proxy(url);
+    await m3u8Proxy.proxyTs(headers, res);
+})
+
 // temp
 fastify.get("/test", (req, res) => {
     const file = readFileSync(join(__dirname, "../index.html"));

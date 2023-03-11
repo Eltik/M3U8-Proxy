@@ -1,3 +1,4 @@
+import { writeFileSync } from "fs";
 import API from "../API";
 
 export default class M3U8Proxy extends API {
@@ -23,7 +24,7 @@ export default class M3U8Proxy extends API {
                     newLines.push(line);
                 } else {
                     const url = new URL(line, this.url);
-                    newLines.push(`${this.config.web_server.url + "/m3u8_proxy?url=" + encodeURIComponent(url.href) + "&headers=" + JSON.stringify(encodeURIComponent(headers))}`);
+                    newLines.push(`${this.config.web_server.url + "/m3u8_proxy?url=" + encodeURIComponent(url.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
                 }
             }
             reply.header('Content-Type', 'application/vnd.apple.mpegurl');
@@ -41,7 +42,9 @@ export default class M3U8Proxy extends API {
                     newLines.push(line);
                 } else {
                     const url = new URL(line, this.url);
-                    newLines.push(`${this.corsProxy + "/" + url.href}`);
+                    //newLines.push(`${this.corsProxy + "/" + url.href}`);
+                    //newLines.push(`${this.corsProxy}/${this.config.web_server.url + "/ts_proxy?url=" + encodeURIComponent(url.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`)
+                    newLines.push(`${this.config.web_server.url + "/ts_proxy?url=" + encodeURIComponent(url.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
                 }
             }
             reply.header('Content-Type', 'application/vnd.apple.mpegurl');
@@ -51,5 +54,23 @@ export default class M3U8Proxy extends API {
             reply.send(newLines.join("\n"));
             return;
         }
+    }
+
+    public async proxyTs(headers:any, reply:any) {
+        const res = await this.fetch(this.url, {
+            headers: headers,
+        });
+        const data = res.raw();
+        reply.header('Content-Type', data.headers['content-type'] ?? 'video/mp2t');
+        
+        if (data.headers["content-length"]) {
+            reply.header('Content-Length', data.headers["content-length"]);
+        }
+        if (data.headers["content-range"]) {
+            reply.header('Content-Range', data.headers["content-range"]);
+        }
+
+        reply.send(data.data);
+        return;
     }
 }

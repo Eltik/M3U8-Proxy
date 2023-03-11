@@ -4,4 +4,5 @@ export default class M3U8Proxy extends API {
     private corsProxy;
     constructor(url: string);
     proxy(headers: any, reply: any): Promise<void>;
+    proxyTs(headers: any, reply: any): Promise<void>;
 }
