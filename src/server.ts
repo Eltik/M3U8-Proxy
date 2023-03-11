@@ -15,12 +15,26 @@ const server = http.createServer();
 server.on("request", async (req, res) => {
     const uri = new URL(req.url, "http://localhost:3000");
     if (uri.pathname === "/m3u8_proxy") {
-        const headers = JSON.parse(uri.searchParams.get("headers"));
+        let headers = {};
+        try {
+            headers = JSON.parse(uri.searchParams.get("headers"));
+        } catch (e) {
+            res.writeHead(500);
+            res.end(e.message);
+            return;
+        }
         const url = uri.searchParams.get("url");
         const proxy = new M3U8Proxy(url);
         await proxy.proxy(headers, res);
     } else if (uri.pathname === "/ts_proxy") {
-        const headers = JSON.parse(uri.searchParams.get("headers"));
+        let headers = {};
+        try {
+            headers = JSON.parse(uri.searchParams.get("headers"));
+        } catch (e) {
+            res.writeHead(500);
+            res.end(e.message);
+            return;
+        }
         const url = uri.searchParams.get("url");
         const proxy = new M3U8Proxy(url);
         await proxy.proxyTs(headers, req, res);
