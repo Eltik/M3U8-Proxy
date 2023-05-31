@@ -1,13 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import httpProxy from "http-proxy";
 import https from "node:https";
 import http, { Server } from "node:http";
 import net from "node:net";
 import url from "node:url";
 import { getProxyForUrl } from "proxy-from-env";
-import { proxy, proxyTs, web_server_url } from "./M3U8Proxy";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import colors from "colors";
+import axios from "axios";
 
 function withCORS(headers, request) {
     headers['access-control-allow-origin'] = '*';
@@ -86,7 +89,9 @@ function proxyRequest(req, res, proxy) {
     try {
         proxy.web(req, res, proxyOptions);
     } catch (err) {
-        proxy.emit('error', err, req, res);
+        console.error(err);
+        console.log(proxy);
+        //proxy.emit('error', err, req, res);
     }
 }
 
@@ -191,7 +196,6 @@ function getHandler(options, proxy) {
         removeHeaders: [],              // Strip these request headers.
         setHeaders: {},                 // Set these request headers.
         corsMaxAge: 0,                  // If set, an Access-Control-Max-Age header with this value (in seconds) will be added.
-        helpFile: __dirname + '/help.txt',
     };
   
     Object.keys(corsAnywhere).forEach(function(option) {
@@ -249,7 +253,7 @@ function getHandler(options, proxy) {
                 return;
             }
             // Invalid API call. Show how to correctly use the API
-            showUsage(corsAnywhere.helpFile, cors_headers, res);
+            res.end(readFileSync(join(__dirname, "../index.html")));
             return;
         }
 
@@ -278,9 +282,37 @@ function getHandler(options, proxy) {
 
         if (!/^\/https?:/.test(req.url) && !isValidHostName(location.hostname)) {
             // Don't even try to proxy invalid hosts (such as /favicon.ico, /robots.txt)
-            res.writeHead(404, 'Invalid host', cors_headers);
-            res.end('Invalid host: ' + location.hostname);
-            return;
+
+            const uri = new URL(req.url ?? web_server_url, "http://localhost:3000");
+            if (uri.pathname === "/m3u8_proxy") {
+                let headers = {};
+                try {
+                    headers = JSON.parse(uri.searchParams.get("headers") ?? "{}");
+                } catch (e: any) {
+                    res.writeHead(500);
+                    res.end(e.message);
+                    return;
+                }
+                const url = uri.searchParams.get("url");
+                return proxyM3U8(url ?? "", headers, res);
+            } else if (uri.pathname === "/ts_proxy") {
+                let headers = {};
+                try {
+                    headers = JSON.parse(uri.searchParams.get("headers") ?? "{}");
+                } catch (e: any) {
+                    res.writeHead(500);
+                    res.end(e.message);
+                    return;
+                }
+                const url = uri.searchParams.get("url");
+                return proxyTs(url ?? "", headers, req, res);
+            } else if (uri.pathname === "/") {
+                return res.end(readFileSync(join(__dirname, "../index.html")));
+            } else {
+                res.writeHead(404, 'Invalid host', cors_headers);
+                res.end('Invalid host: ' + location.hostname);
+                return;
+            }
         }
 
         if (!hasRequiredHeaders(req.headers)) {
@@ -355,8 +387,8 @@ function createServer(options) {
         });
     }
 
-    const proxy = httpProxy.createServer(httpProxyOptions);
-    const requestHandler = getHandler(options, proxy);
+    const proxyServer = httpProxy.createServer(httpProxyOptions);
+    const requestHandler = getHandler(options, proxyServer);
     let server: Server;
     if (options.httpsOptions) {
         server = https.createServer(options.httpsOptions, requestHandler);
@@ -365,7 +397,7 @@ function createServer(options) {
     }
 
     // When the server fails, just show a 404 instead of Internal server error
-    proxy.on('error', function(err, req, res) {
+    proxyServer.on('error', function(err, req, res) {
         if (res.headersSent) {
             // This could happen when a protocol error occurs when an error occurs
             // after the headers have been received (and forwarded). Do not write
@@ -392,31 +424,11 @@ function createServer(options) {
     return server;
 };
 
-const help_text = {};
-function showUsage(help_file, headers, response) {
-    const isHtml = /\.html$/.test(help_file);
-    headers['content-type'] = isHtml ? 'text/html' : 'text/plain';
-    if (help_text[help_file] != null) {
-        response.writeHead(200, headers);
-        response.end(help_text[help_file]);
-    } else {
-        require('fs').readFile(help_file, 'utf8', function(err, data) {
-            if (err) {
-                console.error(err);
-                response.writeHead(500, headers);
-                response.end();
-            } else {
-                help_text[help_file] = data;
-                showUsage(help_file, headers, response); // Recursive call, but since data is a string, the recursion will end
-            }
-        });
-    }
-}
+const host = process.env.HOST || "0.0.0.0";
+const port = process.env.PORT || 8080;
+const web_server_url = process.env.WEB_SERVER_URL || `http://${host}:${port}`;
 
 export default function server() {
-    const host = process.env.HOST || "0.0.0.0";
-    const port = process.env.PORT || 8080;
-
     const originBlacklist = parseEnvList(process.env.CORSANYWHERE_BLACKLIST);
     const originWhitelist = parseEnvList(process.env.CORSANYWHERE_WHITELIST);
     function parseEnvList(env) {
@@ -426,10 +438,10 @@ export default function server() {
         return env.split(',');
     }
 
-    const server = createServer({
+    createServer({
         originBlacklist: originBlacklist,
         originWhitelist: originWhitelist,
-        requireHeader: ['origin', 'x-requested-with'],
+        requireHeader: [],
         checkRateLimit: createRateLimitChecker(process.env.CORSANYWHERE_RATELIMIT),
         removeHeaders: [
             'cookie',
@@ -453,35 +465,6 @@ export default function server() {
     }).listen(port, Number(host), function() {
         console.log(colors.green("Server running on ") + colors.blue(`${host}:${port}`));
     });
-
-    server.on("request", async(req, res) => {
-        const uri = new URL(req.url ?? web_server_url, "http://localhost:3000");
-        if (uri.pathname === "/m3u8_proxy") {
-            let headers = {};
-            try {
-                headers = JSON.parse(uri.searchParams.get("headers") ?? "{}");
-            } catch (e: any) {
-                res.writeHead(500);
-                res.end(e.message);
-                return;
-            }
-            const url = uri.searchParams.get("url");
-            await proxy(url ?? "", headers, res);
-        } else if (uri.pathname === "/ts_proxy") {
-            let headers = {};
-            try {
-                headers = JSON.parse(uri.searchParams.get("headers") ?? "{}");
-            } catch (e: any) {
-                res.writeHead(500);
-                res.end(e.message);
-                return;
-            }
-            const url = uri.searchParams.get("url");
-            await proxyTs(url ?? "", headers, req, res);
-        } else if (uri.pathname === "/") {
-            res.end(readFileSync(join(__dirname, "../index.html")));
-        }
-    })
 }
 
 function createRateLimitChecker(CORSANYWHERE_RATELIMIT) {
@@ -557,3 +540,133 @@ function createRateLimitChecker(CORSANYWHERE_RATELIMIT) {
         accessedHosts[host] = count;
     };
 };
+
+const help_text = {};
+function showUsage(help_file, headers, response) {
+    const isHtml = /\.html$/.test(help_file);
+    headers['content-type'] = isHtml ? 'text/html' : 'text/plain';
+    if (help_text[help_file] != null) {
+        response.writeHead(200, headers);
+        response.end(help_text[help_file]);
+    } else {
+        require('fs').readFile(help_file, 'utf8', function(err, data) {
+            if (err) {
+                console.error(err);
+                response.writeHead(500, headers);
+                response.end();
+            } else {
+                help_text[help_file] = data;
+                showUsage(help_file, headers, response); // Recursive call, but since data is a string, the recursion will end
+            }
+        });
+    }
+}
+
+/**
+ * @description Proxies m3u8 files and replaces the content to point to the proxy.
+ * @param headers JSON headers
+ * @param res Server response object
+ */
+export async function proxyM3U8(url: string, headers:any, res:http.ServerResponse) {
+    const req = await axios(url, {
+        headers: headers,
+    }).catch((err) => {
+        res.writeHead(500);
+        res.end(err.message);
+        return null;
+    });
+    if (!req) {
+        return;
+    }
+    const m3u8 = req.data;
+    if (m3u8.includes("RESOLUTION=")) {
+        // Deals with the master m3u8 and replaces all sub-m3u8 files (quality m3u8 files basically) to use the m3u8 proxy.
+        // So if there is 360p, 480p, etc. Instead, the URL's of those m3u8 files will be replaced with the proxy URL.
+        const lines = m3u8.split("\n");
+        const newLines: string[] = [];
+        for (const line of lines) {
+            if (line.startsWith("#")) {
+                newLines.push(line);
+            } else {
+                const uri = new URL(line, url);
+                newLines.push(`${web_server_url + "/m3u8_proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
+            }
+        }
+
+        // You need these headers so that the client recognizes the response as an m3u8.
+        res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "*");
+        res.setHeader("Access-Control-Allow-Methods", "*");
+        res.end(newLines.join("\n"));
+
+        return;
+    } else {
+        // Deals with each individual quality. Replaces the TS files with the proxy URL.
+        const lines = m3u8.split("\n");
+        const newLines: string[] = [];
+        for (const line of lines) {
+            if (line.startsWith("#")) {
+                newLines.push(line);
+            } else {
+                const uri = new URL(line, url);
+                // CORS is needed since the TS files are not on the same domain as the client.
+                // This replaces each TS file to use a TS proxy with the headers attached.
+                // So each TS request will use the headers inputted to the proxy
+                newLines.push(`${web_server_url}${"/ts_proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`)
+            }
+        }
+
+        // You need these headers so that the client recognizes the response as an m3u8.
+        res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Headers", "*");
+        res.setHeader("Access-Control-Allow-Methods", "*");
+        res.end(newLines.join("\n"));
+        return;
+    }
+}
+
+/**
+ * @description Proxies TS files. Sometimes TS files require headers to be sent with the request.
+ * @param headers JSON headers
+ * @param req Client request object
+ * @param res Server response object
+ */
+export async function proxyTs(url: string, headers:any, req, res:http.ServerResponse) {
+    // I love how NodeJS HTTP request client only takes http URLs :D It's so fun!
+    // I'll probably refactor this later.
+    const httpURL = url.replace("https://", "http://");
+    const uri = new URL(httpURL);
+
+    // Options
+    // It might be worth adding ...req.headers to the headers object, but once I did that
+    // the code broke and I receive errors such as "Cannot access direct IP" or whatever.
+    const options = {
+        hostname: uri.hostname,
+        port: uri.port,
+        path: uri.pathname + uri.search,
+        method: req.method,
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+            ...headers,
+        }
+    }
+
+    // Proxy request and pipe to client
+    try {
+        const proxy = http.request(options, (r) => {
+            res.writeHead(r.statusCode ?? 200, r.headers);
+            r.pipe(res, {
+                end: true
+            });
+        });
+        req.pipe(proxy, {
+            end: true
+        });
+    } catch (e: any) {
+        res.writeHead(500);
+        res.end(e.message);
+        return null;
+    }
+}
