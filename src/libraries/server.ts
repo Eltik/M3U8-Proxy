@@ -1,3 +1,9 @@
+/**
+ * @author Eltik. Credit to CORS proxy by Rob Wu.
+ * @description Proxies m3u8 files.
+ * @license MIT
+ */
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -284,7 +290,7 @@ function getHandler(options, proxy) {
             // Don't even try to proxy invalid hosts (such as /favicon.ico, /robots.txt)
 
             const uri = new URL(req.url ?? web_server_url, "http://localhost:3000");
-            if (uri.pathname === "/m3u8_proxy") {
+            if (uri.pathname === "/m3u8-proxy") {
                 let headers = {};
                 try {
                     headers = JSON.parse(uri.searchParams.get("headers") ?? "{}");
@@ -295,7 +301,7 @@ function getHandler(options, proxy) {
                 }
                 const url = uri.searchParams.get("url");
                 return proxyM3U8(url ?? "", headers, res);
-            } else if (uri.pathname === "/ts_proxy") {
+            } else if (uri.pathname === "/ts-proxy") {
                 let headers = {};
                 try {
                     headers = JSON.parse(uri.searchParams.get("headers") ?? "{}");
@@ -541,27 +547,6 @@ function createRateLimitChecker(CORSANYWHERE_RATELIMIT) {
     };
 };
 
-const help_text = {};
-function showUsage(help_file, headers, response) {
-    const isHtml = /\.html$/.test(help_file);
-    headers['content-type'] = isHtml ? 'text/html' : 'text/plain';
-    if (help_text[help_file] != null) {
-        response.writeHead(200, headers);
-        response.end(help_text[help_file]);
-    } else {
-        require('fs').readFile(help_file, 'utf8', function(err, data) {
-            if (err) {
-                console.error(err);
-                response.writeHead(500, headers);
-                response.end();
-            } else {
-                help_text[help_file] = data;
-                showUsage(help_file, headers, response); // Recursive call, but since data is a string, the recursion will end
-            }
-        });
-    }
-}
-
 /**
  * @description Proxies m3u8 files and replaces the content to point to the proxy.
  * @param headers JSON headers
@@ -589,7 +574,7 @@ export async function proxyM3U8(url: string, headers:any, res:http.ServerRespons
                 newLines.push(line);
             } else {
                 const uri = new URL(line, url);
-                newLines.push(`${web_server_url + "/m3u8_proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
+                newLines.push(`${web_server_url + "/m3u8-proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
             }
         }
 
@@ -599,7 +584,6 @@ export async function proxyM3U8(url: string, headers:any, res:http.ServerRespons
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
         res.end(newLines.join("\n"));
-
         return;
     } else {
         // Deals with each individual quality. Replaces the TS files with the proxy URL.
@@ -613,7 +597,7 @@ export async function proxyM3U8(url: string, headers:any, res:http.ServerRespons
                 // CORS is needed since the TS files are not on the same domain as the client.
                 // This replaces each TS file to use a TS proxy with the headers attached.
                 // So each TS request will use the headers inputted to the proxy
-                newLines.push(`${web_server_url}${"/ts_proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`)
+                newLines.push(`${web_server_url}/${web_server_url}${"/ts-proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`)
             }
         }
 

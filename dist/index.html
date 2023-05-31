@@ -52,10 +52,10 @@
                 if (Hls.isSupported()) {
                     var video = document.getElementById('hls');
                     var hls = new Hls();
-                    hls.loadSource(`/m3u8_proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`);
+                    hls.loadSource(`/m3u8-proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`);
                     hls.attachMedia(video);
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        console.log(`/m3u8_proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`)
+                        console.log(`/m3u8-proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`)
                     });
                 }
             }

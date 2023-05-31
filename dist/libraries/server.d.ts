@@ -1,3 +1,8 @@
+/**
+ * @author Eltik. Credit to CORS proxy by Rob Wu.
+ * @description Proxies m3u8 files.
+ * @license MIT
+ */
 /// <reference types="node" />
 import http from "node:http";
 export default function server(): void;
