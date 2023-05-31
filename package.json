@@ -1,19 +1,21 @@
 {
   "devDependencies": {
     "@types/node": "^18.11.13",
+    "typescript": "^4.9.4",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "copyfiles": "^2.4.1"
   },
   "name": "m3u8-proxy",
   "description": "Proxy m3u8 files through pure JavaScript.",
   "version": "0.0.1",
   "main": "./built/server.js",
   "scripts": {
+    "dev": "ts-node src/index.ts",
     "build": "npm run build:ts",
-    "build:ts": "tsc --build",
+    "build:ts": "tsc --build && npm run copy-files",
+    "copy-files": "copyfiles -u 1 src/**/*.html src/**/*.txt dist/",
     "clean": "tsc --build --clean",
-    "start": "node ./built/server.js",
-    "start:pm2": "pm2 start \"npm start\" --name M3U8-Proxy"
+    "start": "node ./dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,8 @@
   "dependencies": {
     "axios": "^0.27.2",
     "colors": "^1.4.0",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "http-proxy": "^1.18.1",
+    "proxy-from-env": "^1.1.0"
   }
 }

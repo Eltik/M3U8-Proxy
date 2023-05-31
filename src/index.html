@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Eltik's M3U8 Proxy</title>
+        <meta charset="utf-8">
+        <meta name="title" content="Eltik's M3U8 Proxy" />
+        <meta name="description" content="Playground for testing Eltik's m3u8 proxy." />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://m3u8.eltik.net/test" />
+        <meta property="og:title" content="Eltik's M3U8 Proxy" />
+        <meta property="og:description" content="Playground for testing Eltik's m3u8 proxy." />
+        <meta property="og:image" content="" />
+
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://m3u8.eltik.net/test" />
+        <meta property="twitter:title" content="Eltik's M3U8 Proxy"/>
+        <meta property="twitter:description" content="Playground for testing Eltik's m3u8 proxy." />
+        <meta property="twitter:image" content="" />
+        <style>
+            video {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Very bad playground design but its fine</h1>
+        <p>basically put in an m3u8 for the url, and put stringified headers into the headers section. yeah thats it.</p>
+        <label for="url">URL</label>
+        <input type="text" id="url" value="https://wkmq.vizcloud.club/simple/EqPFIfMQWADtjDlGha7rC5AuoFwHuLmxQwN7rqk+wYMnU94US2El_Po4w12g/br/list.m3u8#.mp4" />
+        <label for="headers">Headers</label>
+        <textarea id="headers">{"referer": "https://9anime.pl"}</textarea>
+        <button onclick="test()">Test</button>
+        <video id="hls" controls></video>
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        <script>
+            function test() {
+                const url = document.getElementById('url').value;
+                let headers = document.getElementById('headers').value;
+
+                try {
+                    headers = JSON.parse(headers);
+                } catch (e) {
+                    headers = {};
+                    alert("Invalid headers. Set headers to {}.");
+                }
+
+                console.log("Using URL " + url);
+                console.log("Using headers " + JSON.stringify(headers));
+
+                if (Hls.isSupported()) {
+                    var video = document.getElementById('hls');
+                    var hls = new Hls();
+                    hls.loadSource(`/m3u8_proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        console.log(`/m3u8_proxy?url=${encodeURIComponent(url)}&headers=${encodeURIComponent(JSON.stringify(headers))}`)
+                    });
+                }
+            }
+        </script>
+    </body>
+</html>
