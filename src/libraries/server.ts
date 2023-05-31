@@ -620,8 +620,13 @@ export async function proxyM3U8(url: string, headers:any, res:http.ServerRespons
 export async function proxyTs(url: string, headers:any, req, res:http.ServerResponse) {
     // I love how NodeJS HTTP request client only takes http URLs :D It's so fun!
     // I'll probably refactor this later.
-    const httpURL = url.replace("https://", "http://");
-    const uri = new URL(httpURL);
+
+    let forceHTTPS = false;
+
+    if (url.startsWith("https://")) {
+        forceHTTPS = true;
+    }
+    const uri = new URL(url);
 
     // Options
     // It might be worth adding ...req.headers to the headers object, but once I did that
@@ -639,15 +644,27 @@ export async function proxyTs(url: string, headers:any, req, res:http.ServerResp
 
     // Proxy request and pipe to client
     try {
-        const proxy = http.request(options, (r) => {
-            res.writeHead(r.statusCode ?? 200, r.headers);
-            r.pipe(res, {
+        if (forceHTTPS) {
+            const proxy = https.request(options, (r) => {
+                res.writeHead(r.statusCode ?? 200, r.headers);
+                r.pipe(res, {
+                    end: true
+                });
+            });
+            req.pipe(proxy, {
                 end: true
             });
-        });
-        req.pipe(proxy, {
-            end: true
-        });
+        } else {
+            const proxy = http.request(options, (r) => {
+                res.writeHead(r.statusCode ?? 200, r.headers);
+                r.pipe(res, {
+                    end: true
+                });
+            });
+            req.pipe(proxy, {
+                end: true
+            });
+        }
     } catch (e: any) {
         res.writeHead(500);
         res.end(e.message);

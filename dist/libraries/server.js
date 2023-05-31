@@ -581,8 +581,11 @@ exports.proxyM3U8 = proxyM3U8;
 async function proxyTs(url, headers, req, res) {
     // I love how NodeJS HTTP request client only takes http URLs :D It's so fun!
     // I'll probably refactor this later.
-    const httpURL = url.replace("https://", "http://");
-    const uri = new URL(httpURL);
+    let forceHTTPS = false;
+    if (url.startsWith("https://")) {
+        forceHTTPS = true;
+    }
+    const uri = new URL(url);
     // Options
     // It might be worth adding ...req.headers to the headers object, but once I did that
     // the code broke and I receive errors such as "Cannot access direct IP" or whatever.
@@ -598,15 +601,28 @@ async function proxyTs(url, headers, req, res) {
     };
     // Proxy request and pipe to client
     try {
-        const proxy = node_http_1.default.request(options, (r) => {
-            res.writeHead(r.statusCode ?? 200, r.headers);
-            r.pipe(res, {
+        if (forceHTTPS) {
+            const proxy = node_https_1.default.request(options, (r) => {
+                res.writeHead(r.statusCode ?? 200, r.headers);
+                r.pipe(res, {
+                    end: true
+                });
+            });
+            req.pipe(proxy, {
                 end: true
             });
-        });
-        req.pipe(proxy, {
-            end: true
-        });
+        }
+        else {
+            const proxy = node_http_1.default.request(options, (r) => {
+                res.writeHead(r.statusCode ?? 200, r.headers);
+                r.pipe(res, {
+                    end: true
+                });
+            });
+            req.pipe(proxy, {
+                end: true
+            });
+        }
     }
     catch (e) {
         res.writeHead(500);
