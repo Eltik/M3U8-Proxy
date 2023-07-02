@@ -545,7 +545,7 @@ async function proxyM3U8(url, headers, res) {
         ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
         // You need these headers so that the client recognizes the response as an m3u8.
         res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
-        res.setHeader("Content-Disposition", `attachment; filename="filename.jpg"`);
+        res.setHeader("Content-Type", "video/mp2t");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
@@ -579,7 +579,7 @@ async function proxyM3U8(url, headers, res) {
         ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
         // You need these headers so that the client recognizes the response as an m3u8.
         res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
-        res.setHeader("Content-Disposition", `attachment; filename="filename.jpg"`);
+        res.setHeader("Content-Type", "video/mp2t");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
