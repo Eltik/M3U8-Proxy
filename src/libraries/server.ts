@@ -589,10 +589,10 @@ export async function proxyM3U8(url: string, headers: any, res: http.ServerRespo
 
         // You need these headers so that the client recognizes the response as an m3u8.
         res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
-        res.setHeader("Content-Type", "video/mp2t");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
+
         res.end(newLines.join("\n"));
         return;
     } else {
@@ -622,10 +622,10 @@ export async function proxyM3U8(url: string, headers: any, res: http.ServerRespo
 
         // You need these headers so that the client recognizes the response as an m3u8.
         res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
-        res.setHeader("Content-Type", "video/mp2t");
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Headers", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
+
         res.end(newLines.join("\n"));
         return;
     }
@@ -667,6 +667,7 @@ export async function proxyTs(url: string, headers: any, req, res: http.ServerRe
     try {
         if (forceHTTPS) {
             const proxy = https.request(options, (r) => {
+                r.headers["content-type"] = "video/mp2t";
                 res.writeHead(r.statusCode ?? 200, r.headers);
 
                 r.pipe(res, {
@@ -678,6 +679,7 @@ export async function proxyTs(url: string, headers: any, req, res: http.ServerRe
             });
         } else {
             const proxy = http.request(options, (r) => {
+                r.headers["content-type"] = "video/mp2t";
                 res.writeHead(r.statusCode ?? 200, r.headers);
 
                 r.pipe(res, {
