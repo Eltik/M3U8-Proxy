@@ -668,7 +668,6 @@ export async function proxyTs(url: string, headers: any, req, res: http.ServerRe
         if (forceHTTPS) {
             const proxy = https.request(options, (r) => {
                 r.headers["content-type"] = "video/mp2t";
-                r.headers["content-disposition"] = "attachment";
                 res.writeHead(r.statusCode ?? 200, r.headers);
 
                 r.pipe(res, {
@@ -682,7 +681,6 @@ export async function proxyTs(url: string, headers: any, req, res: http.ServerRe
         } else {
             const proxy = http.request(options, (r) => {
                 r.headers["content-type"] = "video/mp2t";
-                r.headers["content-disposition"] = "attachment";
                 res.writeHead(r.statusCode ?? 200, r.headers);
 
                 r.pipe(res, {
