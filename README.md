@@ -2,7 +2,7 @@
 Proxies m3u8 files through pure JavaScript.
 
 ## About
-Some m3u8 files require special headers as well as CORS. This project achieves both by integrating Rob Wu's [CORS proxdy](https://github.com/Rob--W/cors-anywhere) and adding a route to proxy m3u8 files.
+Some m3u8 files require special headers as well as CORS. This project achieves both by integrating Rob Wu's [CORS proxy](https://github.com/Rob--W/cors-anywhere) and adding a route to proxy m3u8 files.
 
 ## Installation
 1. Clone the repository.
@@ -15,8 +15,15 @@ git clone https://github.com/Eltik/M3U8-Proxy.git
 
 You can configure how the proxy works via a `.env` file; it's relatively self-explanatory.
 ```
+# This file is a template for .env file
+# Copy this file to .env and change the values
+
+# Web server configuration
 HOST="localhost"
 PORT="3030"
+
+# Public URL to proxy ts files from
+PUBLIC_URL="https://m3u8.eltik.net"
 ```
 
 ## Usage
