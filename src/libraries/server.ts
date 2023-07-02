@@ -574,7 +574,7 @@ export async function proxyM3U8(url: string, headers: any, res: http.ServerRespo
             if (line.startsWith("#")) {
                 if (line.startsWith("#EXT-X-KEY:")) {
                     const regex = /https?:\/\/[^\""\s]+/g;
-                    const url = `${web_server_url}/${encodeURIComponent(web_server_url)}${"/ts-proxy?url=" + encodeURIComponent(regex.exec(line)?.[0] ?? "") + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`;
+                    const url = `${web_server_url}${"/ts-proxy?url=" + encodeURIComponent(regex.exec(line)?.[0] ?? "") + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`;
                     newLines.push(line.replace(regex, url));
                 } else {
                     newLines.push(line);
@@ -600,7 +600,7 @@ export async function proxyM3U8(url: string, headers: any, res: http.ServerRespo
             if (line.startsWith("#")) {
                 if (line.startsWith("#EXT-X-KEY:")) {
                     const regex = /https?:\/\/[^\""\s]+/g;
-                    const url = `${web_server_url}/${web_server_url}${"/ts-proxy?url=" + encodeURIComponent(regex.exec(line)?.[0] ?? "") + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`;
+                    const url = `${web_server_url}${"/ts-proxy?url=" + encodeURIComponent(regex.exec(line)?.[0] ?? "") + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`;
                     newLines.push(line.replace(regex, url));
                 } else {
                     newLines.push(line);
@@ -610,7 +610,7 @@ export async function proxyM3U8(url: string, headers: any, res: http.ServerRespo
                 // CORS is needed since the TS files are not on the same domain as the client.
                 // This replaces each TS file to use a TS proxy with the headers attached.
                 // So each TS request will use the headers inputted to the proxy
-                newLines.push(`${web_server_url}/${web_server_url}${"/ts-proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
+                newLines.push(`${web_server_url}${"/ts-proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
             }
         }
 
