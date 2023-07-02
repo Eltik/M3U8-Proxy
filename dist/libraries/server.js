@@ -542,6 +542,7 @@ async function proxyM3U8(url, headers, res) {
                 newLines.push(`${web_server_url + "/m3u8-proxy?url=" + encodeURIComponent(uri.href) + "&headers=" + encodeURIComponent(JSON.stringify(headers))}`);
             }
         }
+        ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
         // You need these headers so that the client recognizes the response as an m3u8.
         res.setHeader("Content-Type", "application/vnd.apple.mpegurl");
         res.setHeader("Access-Control-Allow-Origin", "*");
@@ -617,6 +618,7 @@ async function proxyTs(url, headers, req, res) {
         if (forceHTTPS) {
             const proxy = node_https_1.default.request(options, (r) => {
                 res.writeHead(r.statusCode ?? 200, r.headers);
+                ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
                 r.pipe(res, {
                     end: true,
                 });
@@ -628,6 +630,7 @@ async function proxyTs(url, headers, req, res) {
         else {
             const proxy = node_http_1.default.request(options, (r) => {
                 res.writeHead(r.statusCode ?? 200, r.headers);
+                ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
                 r.pipe(res, {
                     end: true,
                 });
