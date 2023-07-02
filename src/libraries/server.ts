@@ -666,9 +666,6 @@ export async function proxyTs(url: string, headers: any, req, res: http.ServerRe
         if (forceHTTPS) {
             const proxy = https.request(options, (r) => {
                 res.writeHead(r.statusCode ?? 200, r.headers);
-
-                ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
-
                 r.pipe(res, {
                     end: true,
                 });
@@ -679,9 +676,6 @@ export async function proxyTs(url: string, headers: any, req, res: http.ServerRe
         } else {
             const proxy = http.request(options, (r) => {
                 res.writeHead(r.statusCode ?? 200, r.headers);
-
-                ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers", "Access-Control-Max-Age", "Access-Control-Allow-Credentials", "Access-Control-Expose-Headers", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Origin", "Vary", "Referer", "Server", "x-cache", "via", "x-amz-cf-pop", "x-amz-cf-id"].map((header) => res.removeHeader(header));
-
                 r.pipe(res, {
                     end: true,
                 });
