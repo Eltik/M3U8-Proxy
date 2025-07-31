@@ -1,6 +1,8 @@
 # M3U8-Proxy
 Proxies m3u8 files through pure JavaScript.
 
+**NOTE**: I no longer maintain or work on this proxy. You may join the Discord and ask for help, but I likely will not be able to give a proper response as I don't work with scraping websites anymore.
+
 ## About
 Some m3u8 files require special headers as well as CORS. This project achieves both by integrating Rob Wu's [CORS proxy](https://github.com/Rob--W/cors-anywhere) and adding a route to proxy m3u8 files.
 
